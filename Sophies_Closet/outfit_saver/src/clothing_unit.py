@@ -642,10 +642,4 @@ class TextViewDelegate:
 	def textview_did_end_editing(self, textview):
 		self.clothing_unit_view.model.note = textview.text
 		self.clothing_unit_view.model.save_note()
-
-
-
-class Clothing_Unit_View(ui.View):
-	def __init__(self, bg_color, outfit_saver):
-		
 	

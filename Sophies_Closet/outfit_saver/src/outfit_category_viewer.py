@@ -7,14 +7,11 @@ from outfit import Outfit
 
 class Outfit_Category_Viewer(Category_Viewer):
 	def __init__(self, outfit_saver):
-		self.title = "OUTFIT CATEGORIES"
-		self.db_table = "outfit_categories"
+		self.table_name = "outfit_categories"
 		self.image_type = "outfit"
 
 		super().__init__(outfit_saver)
 		
-		self.view.background_color = "97C1B0"
-
 	def add_category(self, sender):
 		if not self.remove_mode:
 			print("adding category")
@@ -67,25 +64,7 @@ class Outfit_Category_Viewer(Category_Viewer):
 		conn.commit()
 		conn.close()
 		
-		x = len(self.remove_buttons)-1
-		category_keys = list(self.category_icons.keys())
-		while self.remove_buttons[x].button.name != category_id:
-			self.remove_buttons[x].button.center = self.remove_buttons[x-1].button.center
-			key = category_keys[x]
-			next_key = category_keys[x-1]
-			self.category_icons[key].button.center = self.category_icons[next_key].button.center
-			
-			x-=1
-			
-		self.scroll_view.remove_subview(self.remove_buttons[x].button)
-		self.scroll_view.remove_subview(self.category_icons[category_id].button)
-			
-		self.remove_buttons.pop(x)
-		del self.category_icons[category_id]
-		
-		self.view.remove_subview(self.warning_view)
-		
-		self.warning_view = None
+		self.view.remove_category_from_view(category_id)
 			
 			
 		

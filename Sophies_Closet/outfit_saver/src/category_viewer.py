@@ -8,5 +8,17 @@ from icon import Icon
 from warning_view import Warning_View
 
 class Category_Viewer:
+	def __init__(self, ):
+		
 	
-	
+	def load_categories():
+		#Retrieving data
+		conn = sqlite3.connect('../db/outfit_saver.db')
+		cursor = conn.cursor()
+		sql = '''
+		SELECT * FROM "{}"
+		'''.format(this.table_name)
+		cursor.execute(sql)
+		categories = cursor.fetchall()
+		conn.close()
+		return categories

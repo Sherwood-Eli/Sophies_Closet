@@ -13,6 +13,16 @@ class Outfit_Saver:
 	def __init__(self):
 		self.initialize_file_tree()
 		self.initialize_database()
+		
+		self.nav = Nav_View(self)
+		
+		#deployment mode:
+		self.nav.alpha = 0.0  # Set initial alpha to 0
+		def animation():
+			self.nav.alpha = 1.0
+		
+		#self.nav.present("fullscreen", hide_title_bar=True, animated=False)
+		ui.animate(animation, duration=1.0)
 
 		
 	def initialize_file_tree(self):
@@ -151,8 +161,11 @@ class Outfit_Saver:
 		conn.close()
 		
 	def open_outfit_category_viewer(self, sender):
-		#TODO does this need to be done every time?
-		#TODO leaving outfit_category_viewer while in minus mode causes problems
+		#By creating this every time, it reduces memory usage but increases load up time each time
+		outfit_category_viewer = outfit_category_viewer(self)
+		self.nav.push_view("outfit_category_viewer", "")
+		
+		
 		self.outfit_category_viewer.remove_category_icons_from_view()
 		self.outfit_category_viewer.category_icons = self.outfit_category_viewer.load_category_icons()
 		self.outfit_category_viewer.put_category_icons_on_view()
