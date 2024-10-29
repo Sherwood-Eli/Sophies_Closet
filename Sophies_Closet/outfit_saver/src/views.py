@@ -3,8 +3,18 @@ import time
 import gc
 
 from buttons import Add_Button, Back_Button, Search_Button, Remove_Button, Small_Remove_Button, Title_Button
-from icon import Icon
+from preview import Preview
 from warning_view import Warning_View
+
+#DESIGN DECISION JUSTIFICATIONS:
+# - Each view keeps a stack of models and populates itself with the data for the top model,
+#	this stack consists of strings so that we do not have to keep our memory full of objects.
+#	Instead we create each object on demand, stressing the cpu, not the ram...
+
+
+
+
+
 
 class Nav_View(ui.View):
 	#Reusable images
@@ -233,13 +243,13 @@ class Nav_View(ui.View):
 		def populate_view():
 			self.category_icons = self.model.load_category_icons()
 			for id in self.category_icons:
-				self.scroll_view.add_subview(self.category_icons[id].button)
+				self.scroll_view.add_subview(self.category_icons[id].view)
 			
 		
 		#Get rid of everything so we can save some memory
 		def depopulate_view(self):
 			for id in self.category_icons:
-				self.scroll_view.remove_subview(self.category_icons[id].button)
+				self.scroll_view.remove_subview(self.category_icons[id].view)
 			if self.remove_mode:
 				self.toggle_remove_mode(self.remove_button)
 			#Zero out these values

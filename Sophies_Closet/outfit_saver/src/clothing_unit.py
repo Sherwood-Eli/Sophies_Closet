@@ -23,8 +23,8 @@ class Clothing_Unit:
 
 
 
-####################################################
-####	Begin Image Icon Code 					####
+	####################################################
+	####	Begin Image Icon Code 					####
 
 	#Called from:
 	#	Clothing_Unit_View.load_view
@@ -156,11 +156,11 @@ class Clothing_Unit:
 
 		return frame
 		
-####	End Image Icon Code 					####
-####################################################
+	####	End Image Icon Code 					####
+	####################################################
 
-####################################################
-####	Begin Link Icon Code 					####
+	####################################################
+	####	Begin Link Icon Code 					####
 
 	#Called from:
 	#	Image_Selector.return_function
@@ -315,11 +315,11 @@ class Clothing_Unit:
 		return frame
 		
 
-####	End Link Icon Code 						####
-####################################################
+	####	End Link Icon Code 						####
+	####################################################
 
-####################################################
-####	Begin Category Icon Code 				####
+	####################################################
+	####	Begin Category Icon Code 				####
 
 	def load_category_icons(self):
 		#the first category is implied
@@ -493,8 +493,8 @@ class Clothing_Unit:
 
 		
 
-####	End Category Icon Code 					####
-####################################################
+	####	End Category Icon Code 					####
+	####################################################
 		
 	def set_title(self, sender):
 		self.title = sender.text

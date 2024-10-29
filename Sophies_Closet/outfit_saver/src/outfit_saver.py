@@ -4,9 +4,6 @@ import ui
 import math
 import os
 
-from outfit_category_viewer import Outfit_Category_Viewer
-from item_category_viewer import Item_Category_Viewer
-from clothing_unit import Clothing_Unit_View
 from nav_view import Nav_View
 
 class Outfit_Saver:
@@ -162,22 +159,11 @@ class Outfit_Saver:
 		
 	def open_outfit_category_viewer(self, sender):
 		#By creating this every time, it reduces memory usage but increases load up time each time
-		outfit_category_viewer = outfit_category_viewer(self)
 		self.nav.push_view("outfit_category_viewer", "")
 		
-		
-		self.outfit_category_viewer.remove_category_icons_from_view()
-		self.outfit_category_viewer.category_icons = self.outfit_category_viewer.load_category_icons()
-		self.outfit_category_viewer.put_category_icons_on_view()
-		
-		self.nav.push_view(self.outfit_category_viewer.view)
-		
 	def open_item_category_viewer(self, sender):
-		self.item_category_viewer.remove_category_icons_from_view()
-		self.item_category_viewer.category_icons = self.item_category_viewer.load_category_icons()
-		self.item_category_viewer.put_category_icons_on_view()
-		
-		self.nav.push_view(self.item_category_viewer.view)
+		#By creating this every time, it reduces memory usage but increases load up time each time
+		self.nav.push_view("item_category_viewer", "")
 
 				
 outfit_saver = Outfit_Saver()

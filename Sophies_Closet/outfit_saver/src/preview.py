@@ -1,7 +1,7 @@
 import ui
 import sqlite3
 
-class Icon:
+class Preview:
 	def __init__(self, sql_data, get_frame, image_type, action):
 		self.id = str(sql_data[0])
 		self.name = sql_data[1]
@@ -41,18 +41,18 @@ class Icon:
 						image_ratio = image.size[1]/image.size[0]
 						self.image_ratio = image_ratio
 						frame = self.get_frame(image_ratio)
-						icon_width = frame[2]
-						icon_height = icon_width*image_ratio
+						preview_width = frame[2]
+						preview_height = preview_width*image_ratio
 					new_image = ui.ImageView(image=image)
-					new_image.frame = (0, 0, icon_width, icon_height)
-					new_button.frame = ((x*icon_width), 0, icon_width, icon_height)
+					new_image.frame = (0, 0, preview_width, preview_height)
+					new_button.frame = ((x*preview_width), 0, preview_width, preview_height)
 					new_image.content_mode = ui.CONTENT_SCALE_ASPECT_FILL
 					new_button.add_subview(new_image)
 					images.append(new_button)
 					x+=1
 					
 				scroll_view = ui.ScrollView()
-				scroll_view.frame = (0, 0, icon_width, icon_height)
+				scroll_view.frame = (0, 0, preview_width, preview_height)
 				scroll_view.content_size = (images[0].width*(len(images)), images[0].height)
 				scroll_view.paging_enabled = True
 				scroll_view.bounces = False
@@ -61,29 +61,29 @@ class Icon:
 				for image in images:
 					scroll_view.add_subview(image)
 				
-				self.button = ui.View(border_color="black", name=self.id, border_width=2)
-				self.button.frame=frame
-				self.button.add_subview(scroll_view)
+				self.view = ui.View(border_color="black", name=self.id, border_width=2)
+				self.view.frame=frame
+				self.view.add_subview(scroll_view)
 				
 			else:
 				frame = self.get_frame(0)
 				self.image_ratio = 0
-				self.button = ui.Button(frame=frame, border_color="black", border_width=2, name=self.id, action=action, background_color="f0fff5")
+				self.view = ui.Button(frame=frame, border_color="black", border_width=2, name=self.id, action=action, background_color="f0fff5")
 				
 		
 		#TODO can mess around with opening the directory and cding so you dont need to open the directory every time you open an image
 		elif self.type == "c":
 			frame = self.get_frame()
-			self.button = ui.Button(border_color="black", border_width=2, name=self.id, action=action, background_color="f0fff5")
-			self.button.frame = frame
+			self.view = ui.Button(border_color="black", border_width=2, name=self.id, action=action, background_color="f0fff5")
+			self.view.frame = frame
 			
 			try:
 				image = ui.Image.named("../images/background_thumbnails/"+self.photo_path+".PNG").with_rendering_mode(ui.RENDERING_MODE_ORIGINAL)
-				self.button.add_subview(ui.ImageView(image=image, frame=(0, 0, frame[2], frame[3]), content_mode=ui.CONTENT_SCALE_ASPECT_FILL))
+				self.view.add_subview(ui.ImageView(image=image, frame=(0, 0, frame[2], frame[3]), content_mode=ui.CONTENT_SCALE_ASPECT_FILL))
 			except:
 				pass
 			
-		self.button.corner_radius = self.button.width/10
+		self.view.corner_radius = self.view.width/10
 		
 		buffer = frame[2]/20
 		self.title = ui.Label(frame = (buffer, buffer, frame[2]-(2*buffer), frame[3]-(2*buffer)))
@@ -92,4 +92,4 @@ class Icon:
 		self.title.alignment = ui.ALIGN_LEFT
 		self.title.text = self.name
 		
-		self.button.add_subview(self.title)
+		self.view.add_subview(self.title)
