@@ -10,7 +10,6 @@ from warning_view import Warning_View
 class Category_Viewer:
 	def __init__(self, outfit_saver):
 		self.outfit_saver = outfit_saver
-		
 	
 	def load_categories():
 		#Retrieving data

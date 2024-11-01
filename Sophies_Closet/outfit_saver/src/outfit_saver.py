@@ -4,7 +4,7 @@ import ui
 import math
 import os
 
-from nav_view import Nav_View
+from views import Nav_View
 
 class Outfit_Saver:
 	def __init__(self):
