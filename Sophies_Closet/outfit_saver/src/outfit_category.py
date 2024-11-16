@@ -2,21 +2,15 @@ import sqlite3
 
 from category import Category
 from outfit import Outfit
-from icon import Icon
+
 
 class Outfit_Category(Category):
-	def __init__(self, id, title, photo_path, category_viewer, outfit_saver):
-		self.id = id
-		self.title = title
-		self.photo_path = photo_path
-		self.db_table = "outfit_categories"
+	def __init__(self, id, params, view, outfit_saver):
+		self.table_name = "outfit_categories"
 		self.image_type = "outfit"
-		self.category_viewer = category_viewer
-		print("calling super constructor")
-		super().__init__("97C1B0", outfit_saver)
-		print("done with that")
+		super().__init__(id, view, outfit_saver)
 		
-	def load_icons(self):
+	def load_preview_data(self):
 		conn = sqlite3.connect('../db/outfit_saver.db')
 		cursor = conn.cursor()
 		
@@ -28,21 +22,12 @@ class Outfit_Category(Category):
 		WHERE category_id="{}"
 		'''.format(self.id)
 		cursor.execute(sql)
-		outfits = cursor.fetchall()
+		preview_data = cursor.fetchall()
 		conn.close()
-		outfit_icons = {}
-		for outfit in outfits:
-			outfit_icons[str(outfit[0])] = Icon(outfit, self.next_icon_frame, self.image_type, self.icon_button_pressed)
+		return preview_data
 		
-		return outfit_icons
-		
-	def open_clothing_unit(self, outfit_icon):
-		if not self.remove_mode:
-			Outfit(outfit_icon.id, self, "c", self.outfit_saver)
-		
-	def add_clothing_unit(self, sender):
-		if not self.remove_mode:
-			Outfit(None, self, "c", self.outfit_saver)
+	def open_clothing_unit(self, outfit_id):
+		self.outfit_saver.nav.push_view("outfit", outfit_id, outfit_id)
 		
 	def remove_clothing_unit(self, sender):
 		outfit_id = sender.name
@@ -61,5 +46,3 @@ class Outfit_Category(Category):
 		conn.close()
 		
 		self.remove_clothing_unit_icon(outfit_id)
-	
-	

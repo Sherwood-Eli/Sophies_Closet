@@ -6,6 +6,10 @@ import os
 
 from views import Nav_View
 
+
+#Optimization Wish-List
+#	- make a Constants object that I can use to access constants throughout the app, helpful for reducing string dependence
+
 class Outfit_Saver:
 	def __init__(self):
 		self.initialize_file_tree()
@@ -18,7 +22,8 @@ class Outfit_Saver:
 		def animation():
 			self.nav.alpha = 1.0
 		
-		#self.nav.present("fullscreen", hide_title_bar=True, animated=False)
+		self.nav.present("fullscreen", hide_title_bar=True, animated=False)
+		#self.nav.present("fullscreen")
 		ui.animate(animation, duration=1.0)
 
 		
@@ -159,11 +164,11 @@ class Outfit_Saver:
 		
 	def open_outfit_category_viewer(self, sender):
 		#By creating this every time, it reduces memory usage but increases load up time each time
-		self.nav.push_view("outfit_category_viewer", "")
+		self.nav.push_view("outfit_category_viewer", "", "")
 		
 	def open_item_category_viewer(self, sender):
 		#By creating this every time, it reduces memory usage but increases load up time each time
-		self.nav.push_view("item_category_viewer", "")
+		self.nav.push_view("item_category_viewer", "", "")
 
 				
 outfit_saver = Outfit_Saver()

@@ -1,6 +1,9 @@
 import ui
 import sqlite3
 
+#necessary changes to preview:
+	#get rid of silly thpe system and have different preview vlasses that extend Preview
+
 class Preview:
 	def __init__(self, sql_data, get_frame, image_type, action):
 		self.id = str(sql_data[0])
@@ -93,3 +96,5 @@ class Preview:
 		self.title.text = self.name
 		
 		self.view.add_subview(self.title)
+		
+		

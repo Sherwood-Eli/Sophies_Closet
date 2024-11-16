@@ -32,9 +32,7 @@ class Remove_Button:
 		self.view.add_subview(image_view)
 		
 class Small_Remove_Button:
-	def __init__(self, action, name, center, outfit_saver):
-		s_width = outfit_saver.screen_width
-		s_height = outfit_saver.screen_height
+	def __init__(self, action, name, center, s_width, s_height):
 		image = ui.Image.named("../images/button_images/minus_icon.PNG").with_rendering_mode(ui.RENDERING_MODE_ORIGINAL)
 		image_view = ui.ImageView(image=image, content_mode=ui.CONTENT_SCALE_ASPECT_FIT)
 		image_view.width=(s_width*.0375)
@@ -42,8 +40,8 @@ class Small_Remove_Button:
 		image_view.center = ((s_width*.0375), (s_width*.0375))
 		self.view = ui.Button(action = action, background_color="bbfad0")
 		self.view.width=(s_width*.075)
-		self.view.height = self.button.width
-		self.view.corner_radius = self.button.width/2
+		self.view.height = self.view.width
+		self.view.corner_radius = self.view.width/2
 		self.view.center = center
 		self.view.name = name
 		self.view.border_width = 2
@@ -88,7 +86,7 @@ class Image_Button:
 		self.view = ui.Button(action = action, background_color="f0fff5", border_color = "black", border_width = 2)
 		self.view.width=(s_width/10)
 		self.view.height=(s_width/10)
-		self.view.corner_radius = self.button.width/3
+		self.view.corner_radius = self.view.width/3
 		self.view.center = (s_width*(9/10), s_height/10)
 		image_view = ui.ImageView(width=s_width/13, height=s_width/13, image=image, content_mode=ui.CONTENT_SCALE_ASPECT_FIT)
 		image_view.center = (s_width/20, s_width/20)
@@ -100,7 +98,7 @@ class Top_Right_Add_Button:
 		self.view = ui.Button(action = action, background_color="f0fff5", border_color = "black", border_width = 2)
 		self.view.width=(s_width/10)
 		self.view.height=(s_width/10)
-		self.view.corner_radius = self.button.width/3
+		self.view.corner_radius = self.view.width/3
 		self.view.center = (s_width*(9/10), s_height/10)
 		image_view = ui.ImageView(width=s_width/13, height=s_width/13, image=image, content_mode=ui.CONTENT_SCALE_ASPECT_FIT)
 		image_view.center = (s_width/20, s_width/20)
@@ -112,7 +110,7 @@ class Top_Right_Button:
 		self.view = ui.Button(action = action, background_color="f0fff5", border_color = "black", border_width = 2)
 		self.view.width=(s_width/10)
 		self.view.height=(s_width/10)
-		self.view.corner_radius = self.button.width/3
+		self.view.corner_radius = self.view.width/3
 		self.view.center = (s_width*(9/10), s_height/10)
 		image_view = ui.ImageView(width=s_width/13, height=s_width/13, image=image, content_mode=ui.CONTENT_SCALE_ASPECT_FIT)
 		image_view.center = (s_width/20, s_width/20)
@@ -124,7 +122,7 @@ class Top_Left_Button:
 		self.view = ui.Button(action = action, border_color = "black", border_width = 2, background_color="f0fff5")
 		self.view.width=(s_width/10)
 		self.view.height=(s_width/10)
-		self.view.corner_radius = self.button.width/3
+		self.view.corner_radius = self.view.width/3
 		self.view.center = (s_width/10, s_height/10)
 		image_view = ui.ImageView(width=s_width/13, height=s_width/13, image=image, content_mode=ui.CONTENT_SCALE_ASPECT_FIT)
 		image_view.center = (s_width/20, s_width/20)
@@ -148,7 +146,7 @@ class Import_Button:
 		self.view = ui.Button(action = action, background_color="f0fff5", border_color = "black", border_width = 2)
 		self.view.width=(s_width/10)
 		self.view.height=(s_width/10)
-		self.view.corner_radius = self.button.width/3
+		self.view.corner_radius = self.view.width/3
 		self.view.center = (s_width*(9/10), s_height/10)
 		image_view = ui.ImageView(width=s_width/13, height=s_width/13, image=image, content_mode=ui.CONTENT_SCALE_ASPECT_FIT)
 		image_view.center = (s_width/20, s_width/20)
@@ -160,7 +158,7 @@ class Camera_Button:
 		self.view = ui.Button(action = action, background_color="f0fff5", border_color = "black", border_width = 2)
 		self.view.width=(s_width/10)
 		self.view.height=(s_width/10)
-		self.view.corner_radius = self.button.width/3
+		self.view.corner_radius = self.view.width/3
 		self.view.center = (s_width*(9/10), s_height/10)
 		image_view = ui.ImageView(width=s_width/13, height=s_width/13, image=image, content_mode=ui.CONTENT_SCALE_ASPECT_FIT)
 		image_view.center = (s_width/20, s_width/20)
@@ -186,6 +184,7 @@ class Title_Edit_Field:
 		
 class Std_Scroll_View:
 	def __init__(self, s_width, s_height):
+		self.view = ui.ScrollView()
 		self.view.width = s_width
 		self.view.height = s_height*.85
 		self.view.content_size = (s_width, s_height*.5)

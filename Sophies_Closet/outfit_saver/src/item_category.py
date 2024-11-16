@@ -2,20 +2,15 @@ import sqlite3
 
 from category import Category
 from item import Item
-from icon import Icon
+
 
 class Item_Category(Category):
-	def __init__(self, id, title, photo_path, category_viewer, outfit_saver):
-		self.id = id
-		self.title = title
-		self.photo_path = photo_path
-		self.db_table = "item_categories"
+	def __init__(self, id, params, view, outfit_saver):
+		self.table_name = "item_categories"
 		self.image_type = "item"
-		self.category_viewer = category_viewer
-
-		super().__init__("DCBCDA", outfit_saver)
+		super().__init__(id, view, outfit_saver)
 		
-	def load_icons(self):
+	def load_preview_data(self):
 		conn = sqlite3.connect('../db/outfit_saver.db')
 		cursor = conn.cursor()
 		
@@ -27,20 +22,12 @@ class Item_Category(Category):
 		WHERE category_id="{}"
 		'''.format(self.id)
 		cursor.execute(sql)
-		items = cursor.fetchall()
+		preview_data = cursor.fetchall()
 		conn.close()
-		item_icons = {}
-		for item in items:
-			item_icons[str(item[0])] = Icon(item, self.next_icon_frame, self.image_type, self.icon_button_pressed)
-		return item_icons
+		return preview_data
 			
-	def open_clothing_unit(self, item_icon):
-		if not self.remove_mode:
-			Item(item_icon.id, self, "c", self.outfit_saver)
-		
-	def add_clothing_unit(self, sender):
-		if not self.remove_mode:
-			Item(None, self, "c", self.outfit_saver)
+	def open_clothing_unit(self, item_id):
+		self.outfit_saver.nav.push_view("item", item_id, item_id)
 			
 	def remove_clothing_unit(self, sender):
 		item_id = sender.name

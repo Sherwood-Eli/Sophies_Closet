@@ -2,43 +2,38 @@ import sqlite3
 
 from category_viewer import Category_Viewer
 from item_category import Item_Category
-from search_view import Search_View
 from item import Item
 
 class Item_Category_Viewer(Category_Viewer):
-	def __init__(self, outfit_saver):
+	def __init__(self, model_id, params, view, outfit_saver):
 		self.table_name = "item_categories"
 		self.image_type = "item"
 				
-		super().__init__(outfit_saver)
+		super().__init__(model_id, view, outfit_saver)
 				
 	def add_category(self, sender):
-		if not self.remove_mode:
-			Item_Category(None, "NEW CATEGORY", "0", self, self.outfit_saver)
+		self.outfit_saver.nav.push_view("item_category", "", None)
 		
 	def open_category(self, sender):
-		if not self.remove_mode:
-			category_icon = self.category_icons[sender.name]
-			Item_Category(category_icon.id, category_icon.name, category_icon.photo_path, self, self.outfit_saver)
+		self.outfit_saver.nav.push_view("item_category", sender.name, sender.name)
 		
-	def open_search(self, sender):
-		if not self.remove_mode:
-			search_query = """
-			SELECT item_id, item_name
-			FROM items
-			WHERE item_name LIKE 
-			"""
-			image_query = """
-			SELECT item_image_id
-			FROM item_images
-			WHERE item_id=
-			"""
-			self.link_selector = Search_View("Search Clothing Items", search_query, image_query, "item_thumbnails", self.open_item, self.view.background_color, self.outfit_saver)
+	def open_search(self):
+		search_query = """
+		SELECT item_id, item_name
+		FROM items
+		WHERE item_name LIKE 
+		"""
+		image_query = """
+		SELECT item_image_id
+		FROM item_images
+		WHERE item_id=
+		"""
+		self.outfit_saver.nav.push_view("search", "items", ("Search Clothing Items", search_query, image_query, "item_thumbnails", self.open_item, self.view.background_color))
 	
 	#Called by link selector
 	def open_item(self, sender):
-		title = sender.subviews[0].text
-		Item(sender.name, self.link_selector, "s", self.outfit_saver)
+		item_id = sender.name
+		self.outfit_saver.nav.push_view("item", item_id, item_id)
 		
 	def remove_category(self, sender):
 		category_id = sender.name
@@ -62,6 +57,8 @@ class Item_Category_Viewer(Category_Viewer):
 		
 		conn.commit()
 		conn.close()
+		
+		self.view.remove_category_from_view(category_id)
 		
 		
 		

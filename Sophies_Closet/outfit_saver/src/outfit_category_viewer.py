@@ -2,44 +2,38 @@ import sqlite3
 
 from category_viewer import Category_Viewer
 from outfit_category import Outfit_Category
-from search_view import Search_View
 from outfit import Outfit
 
 class Outfit_Category_Viewer(Category_Viewer):
-	def __init__(self, outfit_saver):
+	def __init__(self, model_id, params, view, outfit_saver):
 		self.table_name = "outfit_categories"
 		self.image_type = "outfit"
 
-		super().__init__(outfit_saver)
+		super().__init__(model_id, view, outfit_saver)
 		
 	def add_category(self, sender):
-		if not self.remove_mode:
-			print("adding category")
-			Outfit_Category(None, "NEW CATEGORY", "0", self, self.outfit_saver)
-			print("category opened")
+		self.outfit_saver.nav.push_view("outfit_category", "", None)
 		
 	def open_category(self, sender):
-		if not self.remove_mode:
-			category_icon = self.category_icons[sender.name]
-			Outfit_Category(category_icon.id, category_icon.name, category_icon.photo_path, self, self.outfit_saver)
+		self.outfit_saver.nav.push_view("outfit_category", sender.name, sender.name)
 		
-	def open_search(self, sender):
-		if not self.remove_mode:
-			search_query = """
-			SELECT outfit_id, outfit_name
-			FROM outfits
-			WHERE outfit_name LIKE 
-			"""
-			image_query = """
-			SELECT outfit_image_id
-			FROM outfit_images
-			WHERE outfit_id=
-			"""
-			self.link_selector = Search_View("Search Outfits", search_query, image_query, "outfit_thumbnails", self.open_outfit, self.view.background_color, self.outfit_saver)
-		
+	def open_search(self):
+		search_query = """
+		SELECT outfit_id, outfit_name
+		FROM outfits
+		WHERE outfit_name LIKE 
+		"""
+		image_query = """
+		SELECT outfit_image_id
+		FROM outfit_images
+		WHERE outfit_id=
+		"""
+		self.outfit_saver.nav.push_view("search", "outfits", ("Search Outfits", search_query, image_query, "outfit_thumbnails", self.open_outfit, self.view.background_color))
+	
+	#Called by link selector
 	def open_outfit(self, sender):
-		title = sender.subviews[0].text
-		Outfit(sender.name, self.link_selector, "s", self.outfit_saver)
+		outfit_id = sender.name
+		self.outfit_saver.nav.push_view("outfit", outfit_id, outfit_id)
 		
 	def remove_category(self, sender):
 		category_id = sender.name

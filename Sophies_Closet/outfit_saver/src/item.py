@@ -1,17 +1,14 @@
 import ui
 import sqlite3
 
-from buttons import  *
-from image_selector import Image_Selector
 from clothing_unit import Clothing_Unit
-from search_view import Search_View
 
 class Item(Clothing_Unit):
-	def __init__(self, id, caller, caller_type, outfit_saver):
+	def __init__(self, id, params, view, outfit_saver):
 		self.type = "item"
 		self.link_type = "outfit"
-		super().__init__(id, caller, caller_type, outfit_saver)
-		self.outfit_saver.item_view.load_view(self)
+		super().__init__(id, view, outfit_saver)
+		
 			
 	#Called from:
 	#	Clothing_Unit.__init__()
@@ -84,15 +81,10 @@ class Item(Clothing_Unit):
 		conn.commit()
 		conn.close()
 		
-		if self.caller_type == "c":
-			self.category.update_icon(self.id, self.title, self.score)
 	
 	#Called from:
 	#	self.prompt_delete()
-	def delete(self, sender):
-		if self.id == None:
-			self.close_view(None)
-			return
+	def delete(self):
 		conn = sqlite3.connect('../db/outfit_saver.db')
 		cursor = conn.cursor()
 		#insert into table
@@ -122,13 +114,6 @@ class Item(Clothing_Unit):
 		
 		conn.commit()
 		conn.close()
-		
-		if self.caller_type == "c":
-			self.category.remove_clothing_unit(self.category.icons[self.id].button)
-		elif self.caller_type == "s":
-			self.category.search(self.category.text_field.text)
-		
-		self.close_view(None)
 			
 	def add_image(self, sender):
 		if not self.remove_mode:
@@ -327,7 +312,8 @@ class Item(Clothing_Unit):
 			conn.commit()
 			conn.close()
 		
-	def save_score(self):
+	def save_score(self, new_score):
+		self.score = new_score
 		if self.id == None:
 			self.create()
 		else:
@@ -342,8 +328,6 @@ class Item(Clothing_Unit):
 			result = cursor.execute(sql)
 			conn.commit()
 			conn.close()
-			if self.caller_type == "c":
-				self.category.update_icon(self.id, self.title, self.score)
 		
 	def save_title(self):
 		if self.id == None:
