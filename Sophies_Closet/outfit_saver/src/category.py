@@ -52,6 +52,8 @@ class Category:
 		conn.close()
 		
 	def load_category(self):
+		if self.id == None:
+			return "NEW CATEGORY", "0"
 		conn = sqlite3.connect('../db/outfit_saver.db')
 		cursor = conn.cursor()
 		sql = '''

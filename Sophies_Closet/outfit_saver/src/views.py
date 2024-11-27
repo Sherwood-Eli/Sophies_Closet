@@ -35,6 +35,10 @@ from search import Search
 # management is done responsibly.
 
 
+#TODO:
+	# - make sure title edit field is set to correct value when opening edit field
+
+
 #Reusable images
 white_pattern = ui.Image.named("../images/button_images/white_pattern.PNG").with_rendering_mode(ui.RENDERING_MODE_ORIGINAL)
 colored_pattern = ui.Image.named("../images/button_images/colored_pattern.PNG").with_rendering_mode(ui.RENDERING_MODE_ORIGINAL)
@@ -77,7 +81,7 @@ class Nav_View(ui.View):
 		self.all_views["item_category"] = Category_View("DCBCDA", Item_Category, outfit_saver)
 		self.all_views["outfit"] = Clothing_Unit_View("97C1B0", Outfit, outfit_saver)
 		self.all_views["item"] = Clothing_Unit_View("DCBCDA", Item, outfit_saver)
-		self.all_views["image_selector"] = Image_Selector_View(outfit_saver)
+		self.all_views["image_selector"] = Image_Selector_View(Image_Selector, outfit_saver)
 		self.all_views["search"] = Search_View(Search, outfit_saver)
 
 		self.add_subview(self.root_view)
@@ -86,8 +90,8 @@ class Nav_View(ui.View):
 	def push_view(self, view_type, model_id, params):
 		#get view
 		cur_view = self.all_views[view_type]
-		#pushes model to view and populates necessary stuff for viewing
-		cur_view.push_model(model_id, params)
+		#pushes model to view and populates necessary stuff for viewing, sends the place view is in in view stack
+		cur_view.push_model(len(self.view_stack), model_id, params)
 		
 		#Show view
 		if len(cur_view.model_stack) == 1:
@@ -125,14 +129,19 @@ class Nav_View(ui.View):
 			self.remove_subview(popped_view)
 	
 	#Removes the preview from the next view down on the stack
-	def remove_preview(self, preview_id):
-		if len(self.view_stack) > 1:
-			self.view_stack[-2].remove_preview(preview_id)
+	def remove_preview(self, view_index, preview_id, params):
+		if view_index > 0:
+			self.all_views[self.view_stack[view_index-1]].remove_preview(preview_id, params)
 	
 	#Edits the preview on the next view down on the stack
-	def edit_preview(self, preview_id, params):
-		if len(self.view_stack) > 1:
-			self.view_stack[-2].edit_preview(preview_id, params)
+	def edit_preview(self, view_index, preview_id, params):
+		if view_index > 0:
+			self.all_views[self.view_stack[view_index-1]].edit_preview(preview_id, params)
+			
+			
+	def add_preview(self, view_index, preview_id, params):
+		if view_index > 0:
+			self.all_views[self.view_stack[view_index-1]].add_preview(preview_id, params)
 			
 	#returns category background_image if applicable
 	def get_cur_category(self, category_type):
@@ -224,6 +233,7 @@ class Stackable_View_Template(ui.View):
 	def __init__(self, Model_Class, outfit_saver):
 		self.width = s_width
 		self.height = s_height
+		self.view_index_stack = []
 		self.model_stack = []
 		self.param_stack = []
 		self.outfit_saver = outfit_saver
@@ -231,8 +241,9 @@ class Stackable_View_Template(ui.View):
 		self.model = None
 		
 		
-	def push_model(self, model_id, params):
+	def push_model(self, view_index, model_id, params):
 		#push model_id to model_stack
+		self.view_index_stack.append(view_index)
 		self.model_stack.append(model_id)
 		self.param_stack.append(params)
 		
@@ -248,11 +259,12 @@ class Stackable_View_Template(ui.View):
 			self.populate_view(params)
 		else:
 			#Restore state of view if necessary
-			self.prepare_for_open()
+			self.prepare_for_open(params)
 		
 	def pop_model(self):
+		self.view_index_stack.pop(-1)
 		self.model_stack.pop(-1)
-		self.param_stack.pop(-1)
+		params = self.param_stack.pop(-1)
 		
 		#get rid of old model stuff and replace if different
 		if len(self.model_stack) != 0 and self.model.id != self.model_stack[-1]:
@@ -262,16 +274,15 @@ class Stackable_View_Template(ui.View):
 			self.populate_view(params)
 		else:
 			#Restore state of view if necessary
-			self.prepare_for_open()
-			
-	def remove_preview(self, preview_id):
-		print("stinky programmer")
+			#TODO this might be in the wrong spot, maybe i need tohave this mot happen if there is no model
+			self.prepare_for_open(params)
 	
 	
-	def edit_preview(self, preview_id, params):
-		print("stinky programmer")
+
+	
 		
-	def prepare_for_open(self):
+				
+	def prepare_for_open(self, params):
 		pass
 
 	
@@ -311,7 +322,7 @@ class Category_Viewer_View(Stackable_View_Template):
 		self.add_subview(view_title.view)
 		
 		#Add_Button - Action added later
-		self.add_button = Add_Button(None, s_width, s_height)
+		self.add_button = Add_Button(self.add_category, s_width, s_height)
 		self.add_subview(self.add_button.view)
 		
 		#Remove_Button
@@ -353,34 +364,58 @@ class Category_Viewer_View(Stackable_View_Template):
 		#Creating Icons
 		category_previews = {}
 		for category in categories:
-			category_previews[str(category[0])] = Preview(category, self.next_icon_frame, "background", self.model.open_category)
+			category_previews[str(category[0])] = Preview(category, self.next_icon_frame, "background", self.open_category)
 		return category_previews
+	
+	
+	#cant remove a category preview from anywhere other than the category viewer so i dont need a function to do that.
+	
+	
+	def add_preview(self, preview_id, params):
+		if preview_id not in self.category_previews:
+			self.category_previews[preview_id] = Preview(params, self.next_icon_frame, "background", self.open_category)
+			self.scroll_view.view.add_subview(self.category_previews[preview_id].view)
+		
+		
+	def edit_preview(self, preview_id, params):
+		self.category_previews[preview_id].update(params)
+		
+	
+	
 	
 	#Wrapper for calling depop and pop
 	def refresh_icons(self):
 		self.depopulate_view()
 		self.populate_view()
+		
+	def add_category(self, sender):
+		if not self.remove_mode:
+			self.model.open_category(None, None)
+			
+	def open_category(self, sender):
+		if not self.remove_mode:
+			self.model.open_category(sender.name, None)
 	
 	#Called by remove button
 	def toggle_remove_mode(self, sender):
 		if not self.remove_mode:
 			#Start remove mode
 			self.remove_buttons = []
-			buffer = self.outfit_saver.screen_width*.0125
+			buffer = s_width*.0125
 			#Create remove buttons for all category icons
 			for category_id in self.category_previews:
-				frame = self.category_previews[category_id].button.frame
+				frame = self.category_previews[category_id].view.frame
 				name = category_id
 				center = (frame[0]+buffer, frame[1]+buffer)
-				remove_button = Small_Remove_Button(self.prompt_remove_category, name, center, self.outfit_saver)
-				self.scroll_view.add_subview(remove_button.button)
+				remove_button = Small_Remove_Button(self.prompt_remove_category, name, center, s_width, s_height)
+				self.scroll_view.view.add_subview(remove_button.view)
 				self.remove_buttons.append(remove_button)
 			self.remove_mode = True
 			sender.background_color = "bbfad0"
 		else:
 			#End remove mode
 			for button in self.remove_buttons:
-				self.scroll_view.remove_subview(button.button)
+				self.scroll_view.view.remove_subview(button.view)
 			self.remove_mode = False
 			sender.background_color = "f0fff5"
 	
@@ -403,7 +438,7 @@ class Category_Viewer_View(Stackable_View_Template):
 		
 		#If frame is now past content size of scroll view, increase content size
 		if starting_y+height > self.scroll_view.view.content_size[1]:
-			self.scroll_view.view.content_size = (screen_width, starting_y+height+(2*buffer))
+			self.scroll_view.view.content_size = (s_width, starting_y+height+(2*buffer))
 			
 		return frame
 	
@@ -411,35 +446,57 @@ class Category_Viewer_View(Stackable_View_Template):
 	def prompt_remove_category(self, sender):
 		category_previews = self.category_previews[sender.name]
 		title = category_previews.title.text
-		self.warning_view = Warning_View("Delete '"+title+"'?", "All items in this catgory will continue to exist", self.remove_category, self.cancel_remove, sender.name, self.outfit_saver)
-		self.add_subview(self.warning_view)
+		self.outfit_saver.nav.show_warning("Delete '"+title+"'?", "All items in this catgory will continue to exist", self.remove_category, self.cancel_remove, sender.name)
 		
 	#Handle cancel remove
 	def cancel_remove(self, sender):
-		self.remove_subview(self.warning_view)
-		self.warning_view = None
+		self.outfit_saver.nav.hide_warning()
 		
 	#Handle confirm remove
-	def remove_category_from_view(category_id):
+	def remove_category(self, sender):
+		category_id = sender.name
 		x = len(self.remove_buttons)-1
 		category_keys = list(self.category_previews.keys())
-		while self.remove_buttons[x].button.name != category_id:
-			self.remove_buttons[x].button.center = self.remove_buttons[x-1].button.center
+		#shift categories over
+		while self.remove_buttons[x].view.name != category_id:
+			self.remove_buttons[x].view.center = self.remove_buttons[x-1].view.center
 			key = category_keys[x]
 			next_key = category_keys[x-1]
-			self.category_preciews[key].button.center = self.category_previews[next_key].button.center
+			self.category_previews[key].view.center = self.category_previews[next_key].view.center
 			
 			x-=1
 			
-		self.scroll_view.remove_subview(self.remove_buttons[x].button)
-		self.scroll_view.remove_subview(self.category_previews[category_id].button)
+		self.scroll_view.view.remove_subview(self.remove_buttons[x].view)
+		self.scroll_view.view.remove_subview(self.category_previews[category_id].view)
 			
 		self.remove_buttons.pop(x)
 		del self.category_previews[category_id]
 		
-		self.view.remove_subview(self.warning_view)
+		self.model.remove_category(category_id)
 		
-		self.warning_view = None
+		
+		#update scrollview dimentions and preview location variables
+		self.last_category_x-=1
+		if self.last_category_x == -1:
+			self.last_category_x = 2
+			self.last_category_y -= 1
+		x = self.last_category_x
+		y = self.last_category_y
+
+		
+		buffer = s_width/30
+		starting_x = (buffer)+((s_width/3)*x)
+		starting_y = ((s_height/5)*y)+(buffer)
+		width = (s_width/3)-(2*buffer)
+		height = (s_height/5)-(2*buffer)
+		frame=(starting_x, starting_y, width, height)
+		
+		#If frame is now past content size of scroll view, increase content size
+		if starting_y+height+(2*buffer) < self.scroll_view.view.content_size[1]:
+			self.scroll_view.view.content_size = (s_width, starting_y+height+(2*buffer))
+		
+		self.outfit_saver.nav.hide_warning()
+		
 		
 	def back_button_press(self, sender):
 		self.outfit_saver.nav.pop_view()
@@ -481,7 +538,7 @@ class Category_View(Stackable_View_Template):
 		self.add_subview(self.scroll_view.view)
 		
 		#Title_Button
-		self.title_button = Title_Button("temp", self.edit_title, s_width, s_height)
+		self.title_button = Title_Button("", self.edit_title, s_width, s_height)
 		self.add_subview(self.title_button.view)
 		self.title_edit_field = Title_Edit_Field(self.title_button.view, self.change_title)
 	
@@ -509,27 +566,55 @@ class Category_View(Stackable_View_Template):
 			self.image_view.image = self.bg_image
 		except:
 			pass
+		
+		self.title_button.view.title = self.model.name
+		self.title_edit_field.text_field.text = self.model.name
+		self.put_previews_on_view()
 			
+	def put_previews_on_view(self):
 		#load previews
 		preview_data = self.model.load_preview_data()
 		self.previews = {}
 		for data in preview_data:
-			preview = Preview(data, self.next_icon_frame, self.model.image_type, self.open_clothing_unit)
-			self.previews[str(data[0])] = preview
+			id = str(data[0])
+			preview = Preview(data, self.next_preview_frame, self.model.image_type, self.open_clothing_unit)
+			self.previews[id] = preview
 			self.scroll_view.view.add_subview(preview.view)
+			print("adding", id)
 			
 	
 	def depopulate_view(self):
+		self.remove_previews_from_view()
+		self.image_view.image = None
+		
+	def remove_previews_from_view(self):
 		for id in self.previews:
 			self.scroll_view.view.remove_subview(self.previews[id].view)
+	
 		self.icons = {}
 		self.last_c1_y = const_buffer
 		self.last_c2_y = const_buffer
 		
-		self.image_view.image = None
+		
+	def add_preview(self, preview_id, params):
+		self.previews[preview_id] = Preview(params, self.next_preview_frame, self.model.image_type, self.open_clothing_unit)
+		self.scroll_view.view.add_subview(self.previews[preview_id].view)
+		
+		#in case the category is not created yet try to add it
+		self.outfit_saver.nav.add_preview(self.view_index_stack[-1], self.model.id, (self.model.id, self.model.name, ""))
+		
+		
+	def edit_preview(self, preview_id, params):
+		self.previews[preview_id].update(params)
 		
 	
-	def next_icon_frame(self, image_ratio):
+	def remove_preview(self, preview_id, params):
+		if preview_id in self.previews:
+			self.remove_clothing_unit_preview(preview_id)
+		
+		
+	
+	def next_preview_frame(self, image_ratio):
 		#TODO i want to make it so the scroll view is scrollable when an icon is past the top of the add button
 		
 		width =(s_width/2)-(2*const_buffer)
@@ -560,17 +645,31 @@ class Category_View(Stackable_View_Template):
 			self.model.open_clothing_unit(None)
 		
 	def edit_title(self, sender):
-		self.view.remove_subview(self.title_button.button)
-		self.view.add_subview(self.title_edit_field.text_field)
+		self.remove_subview(self.title_button.view)
+		self.add_subview(self.title_edit_field.text_field)
 		self.title_edit_field.text_field.begin_editing()
 		
-	def change_title(self, sender):
-		self.title = sender.text
-		self.title_button.button.title = self.title
-		self.view.remove_subview(self.title_edit_field.text_field)
-		self.view.add_subview(self.title_button.button)
+	def change_title(self, sender): 
+		new_title = sender.text
 		
-		self.save_category()
+		self.remove_subview(self.title_edit_field.text_field)
+		self.add_subview(self.title_button.view)
+		
+		if self.title_button.view.title == new_title: 
+			return 
+			
+		self.title_button.view.title = new_title
+		
+		
+		need_append = self.model.id == None
+		
+		self.model.save_category(new_title, self.model.photo_path)
+		
+		#update preview on previous screen
+		if need_append:
+			self.outfit_saver.nav.add_preview(self.view_index_stack[-1], self.model.id, (self.model.id, new_title, ""))
+		else:
+			self.outfit_saver.nav.edit_preview(self.view_index_stack[-1], self.model.id, (new_title, None))
 		
 	def change_background_image(self, sender):
 		if not self.remove_mode:
@@ -579,7 +678,16 @@ class Category_View(Stackable_View_Template):
 	def choose_background_image(self, image, image_name):
 		self.image_view.image = image
 		self.bg_image = image
+		
+		need_append = self.model.id == None
+		
 		self.model.save_category(self.model.name, image_name)
+		
+		#update preview on previous screen
+		if need_append:
+			self.outfit_saver.nav.add_preview(self.view_index_stack[-1], self.model.id, (self.model.id, self.model.name, image_name))
+		else:
+			self.outfit_saver.nav.edit_preview(self.view_index_stack[-1], self.model.id, (None, image_name))
 		
 	def toggle_remove_mode(self, sender):
 		if not self.remove_mode:
@@ -591,57 +699,56 @@ class Category_View(Stackable_View_Template):
 			self.remove_mode = False
 			sender.background_color = "f0fff5"
 			
+			
 	def prompt_remove(self, sender):
-		icon = self.icons[sender.name]
-		title = icon.title.text
-		self.warning_view = Warning_View("Delete '"+title+"'?", "This will not be a complete deletion but simply delete from the category", self.remove_clothing_unit, self.cancel_remove, sender.name, self.outfit_saver)
-		self.view.add_subview(self.warning_view)
-		
+		preview = self.previews[sender.name]
+		title = preview.title.text
+		self.outfit_saver.nav.show_warning("Delete '"+title+"'?", "This will not be a complete deletion but simply delete from the category", self.remove_clothing_unit, self.cancel_remove, sender.name)
 		
 	def cancel_remove(self, sender):
-		self.view.remove_subview(self.warning_view)
-		self.warning_view = None
+		self.outfit_saver.nav.hide_warning()
+		
+	def remove_clothing_unit(self, sender):
+		unit_id = sender.name
+		
+		self.model.remove_clothing_unit(unit_id)
+		self.remove_clothing_unit_preview(unit_id)
+		
 		
 	def add_remove_buttons_to_view(self):
 		self.remove_buttons = []
-		buffer = self.outfit_saver.screen_width*.0125
-		for icon_id in self.icons:
-			frame = self.icons[icon_id].button.frame
-			name = icon_id
+		buffer = s_width*.0125
+		for preview_id in self.previews:
+			frame = self.previews[preview_id].view.frame
+			name = preview_id
 			center = (frame[0]+buffer, frame[1]+buffer)
-			remove_button = Small_Remove_Button(self.prompt_remove, name, center, self.outfit_saver)
-			self.scroll_view.add_subview(remove_button.button)
+			remove_button = Small_Remove_Button(self.prompt_remove, name, center, s_width, s_height)
+			self.scroll_view.view.add_subview(remove_button.view)
 			self.remove_buttons.append(remove_button)
 			
 	def remove_remove_buttons_from_view(self):
 		for button in self.remove_buttons:
-			self.scroll_view.remove_subview(button.button)
+			self.scroll_view.view.remove_subview(button.view)
 			
-	def remove_clothing_unit_icon(self, id):
-		#save icons because remove_icons.. deletes it
-		icons = self.icons
-		self.remove_icons_from_view()
-		self.icons = icons
-		
-		del self.icons[id]
-				
+			
+	#TODO this should be rewritten
+	def remove_clothing_unit_preview(self, id):
+		self.remove_previews_from_view()
 		self.remove_remove_buttons_from_view()
-		
-		for icon_id in self.icons:
-			icon = self.icons[icon_id]
-			icon.button.frame = self.next_icon_frame(icon.image_ratio)
-			
-		self.put_icons_on_view()
+
+		self.put_previews_on_view()
 		
 		if self.remove_mode:
 			self.add_remove_buttons_to_view()
-		
-		if self.warning_view != None:
-			self.view.remove_subview(self.warning_view)
-			self.warning_view = None
+			
+		self.outfit_saver.nav.hide_warning()
 		
 		
 	def close_view(self, sender):
+		#make sure title editing is terminated properly
+		self.title_edit_field.text_field.text = self.title_button.view.title
+		self.title_edit_field.text_field.end_editing()
+		
 		self.outfit_saver.nav.pop_view()
 		
 
@@ -787,6 +894,7 @@ class Clothing_Unit_View(Stackable_View_Template):
 		if bg_image != None:
 			self.background_view.image = bg_image
 		self.title_button.view.title = self.model.title
+		self.title_edit_field.text_field.text = self.model.title
 		self.remove_button.view.action = self.toggle_remove_mode
 		self.slider.action = self.set_score
 		self.note_view.text = self.model.note
@@ -801,6 +909,7 @@ class Clothing_Unit_View(Stackable_View_Template):
 	def depopulate_view(self):
 		if self.remove_mode:
 			self.toggle_remove_mode(None)
+		
 			
 		for image in self.image_views:
 			self.image_scroll_view.remove_subview(self.image_views[image])
@@ -813,9 +922,44 @@ class Clothing_Unit_View(Stackable_View_Template):
 		
 		self.zero_out_variables()
 		
-	def prepare_for_open(self):
+	def prepare_for_open(self, params):
 		self.main_scroll_view.content_offset = (0, 0)
 		self.image_scroll_view.content_offset = (0, 0)
+		
+	#this is only called when a link is updated
+	def edit_preview(self, preview_id, params):
+		print("hi")
+		print(params)
+		link = self.link_previews[preview_id]
+		
+		if params[0] != None:
+			link.title_view.text = params[0]
+		
+		if params[1] != None:
+			print("editing crap")
+			image_index = params[2]
+			
+			#-1 means we are adding the first image
+			if image_index == -1:
+				path = "../images/"+self.model.link_type+"_thumbnails/"+params[1]+".PNG"
+				print(path)
+				new_image = ui.Image.named(path).with_rendering_mode(ui.RENDERING_MODE_ORIGINAL)
+				link.image_view.image = new_image
+			
+			#0 means we are removing the first image
+			elif image_index == 0:
+				if params[1] != ":)":
+					path = "../images/"+self.model.link_type+"_thumbnails/"+params[1]+".PNG"
+					print(path)
+					new_image = ui.Image.named(path).with_rendering_mode(ui.RENDERING_MODE_ORIGINAL)
+					link.image_view.image = new_image
+				else:
+					link.image_view.image = None
+		
+	
+	def remove_preview(self, preview_id, params):
+		if preview_id in self.link_previews:
+			self.remove_link_preview(preview_id)
 		
 	
 ####################################################
@@ -855,35 +999,34 @@ class Clothing_Unit_View(Stackable_View_Template):
 		#add image to clothing unit view
 		self.append_image_view(image, image_id)
 		
+		need_append = self.model.id == None
+		
 		self.model.save_image(image_id)
+		
+		#update preview on previous screen
+		if need_append:
+			self.outfit_saver.nav.add_preview(self.view_index_stack[-1], self.model.id, (self.model.id, self.model.title))
+		else:
+			self.outfit_saver.nav.edit_preview(self.view_index_stack[-1], self.model.id, (None, image_id, (-1*len(self.image_views)+1)))
 		
 		#pop image selector view
 		self.outfit_saver.nav.pop_view()
 	
 	def append_image_view(self, image, image_id):
-		frame = self.image_views["0"].frame
-		self.image_views[image_id] = self.create_image_view(frame, image, image_id)
-		
 		add_button = self.image_views["0"]
-		
-		#we need to remove this no matter what 
-		#so we can make sure it is at the end of the key list
-		del self.image_views["0"]
-			
-		#If there are now 5 images, get rid of the add button
-		if len(self.image_views) == 5:
-			self.image_scroll_view.remove_subview(add_button)
-		else:
-			#If we are adding the first image, change the add button label to reflect that
-			if len(self.image_views) == 1:
-				add_button.label_view.text = ""
-			next_frame = self.get_next_image_frame()
-			add_button.frame = next_frame
-			#make sure button is in image_views
-			self.image_views["0"] = add_button
+		frame = add_button.frame
+		add_button.frame = self.get_next_image_frame()
+		self.image_views[image_id] = self.create_image_view(frame, image, image_id)
 		self.image_scroll_view.add_subview(self.image_views[image_id])
 		
-		#TODO make item preview get updated
+		#make sure add button is at the end
+		del self.image_views["0"]
+		self.image_views["0"] = add_button
+		
+		
+		#If we are adding the first image, change the add button label to reflect that
+		if len(self.image_views) == 2:
+			add_button.label_view.text = ""
 	
 	def get_next_image_frame(self):
 		self.last_image_x+=1
@@ -899,7 +1042,8 @@ class Clothing_Unit_View(Stackable_View_Template):
 		height = (scroll_view_height)-(2*buffer)
 		frame=(starting_x, starting_y, width, height)
 		
-		if starting_x+width > self.image_scroll_view.content_size[1]:
+		#by doing x < 5, we dont increase scrollview size if there are already 5 images
+		if x < 5 and starting_x+width > self.image_scroll_view.content_size[1]:
 			self.image_scroll_view.content_size = (starting_x+width+(buffer), scroll_view_height)
 
 		return frame
@@ -915,28 +1059,28 @@ class Clothing_Unit_View(Stackable_View_Template):
 		self.model.remove_image(image_id)
 		
 		#removes undesired view and shifts all if necessary
-		self.remove_icon(image_id, self.image_remove_buttons, self.image_views, self.image_scroll_view)
+		index = self.remove_icon(image_id, self.image_remove_buttons, self.image_views, self.image_scroll_view)
 		
 		# remove last frame
 		self.last_image_x -= 1
 		
-		#change add icon if necessary
-		if len(self.image_views) == 4:
-			frame = self.get_next_image_frame()
-			self.image_views["0"] = self.create_add_icon(frame, "", self.add_image, 25)
-			self.image_scroll_view.add_subview(self.image_views["0"])
-		elif len(self.image_views) == 1:
+		if len(self.image_views) == 1:
 			self.image_views["0"].label_view.text = "No "+self.model.type+" images yet :("
 		
-		#there should always be an add button after remiving
+		#this should always make it the right size even if we are removing a 5th image
 		last_frame = self.image_views["0"].frame
 		self.image_scroll_view.content_size = (last_frame[0]+last_frame[2]+const_buffer, self.image_scroll_view.content_size[1])
 		
 		
 		#Have preview reflect change if it is still in memory
-		#preview = self.outfit_saver.nav.get_preview()
-		#if preview:
-			#preview.update(self.id, self.title, self.score)
+		
+		#if there is new first image, pass the image id so that if the caller is a link preview it gets updated
+		if index == 0 and len(self.image_views) > 1:
+			replacement_id = list(self.image_views.keys())[0]
+		else:
+			replacement_id = ":)"
+		self.outfit_saver.nav.edit_preview(self.view_index_stack[-1], self.model.id, (None, replacement_id, index))
+		
 		
 ####		End Image view Code 				####
 ####################################################
@@ -973,6 +1117,7 @@ class Clothing_Unit_View(Stackable_View_Template):
 		title.alignment = ui.ALIGN_LEFT
 		title.text = link_name
 		button.add_subview(title)
+		button.title_view = title
 		
 		button.action = self.open_link
 		
@@ -982,9 +1127,12 @@ class Clothing_Unit_View(Stackable_View_Template):
 		if len(image_ids) != 0:
 			image_id = str(image_ids[0][0])
 			image = ui.Image.named("../images/"+self.model.link_type+"_thumbnails/"+image_id+".PNG").with_rendering_mode(ui.RENDERING_MODE_ORIGINAL)
-			image_view = ui.ImageView(content_mode=ui.CONTENT_SCALE_ASPECT_FILL, frame=(0,0,frame[2],frame[3]))
-			image_view.image = image
-			button.add_subview(image_view)
+		else:
+			image = None
+		image_view = ui.ImageView(content_mode=ui.CONTENT_SCALE_ASPECT_FILL, frame=(0,0,frame[2],frame[3]))
+		image_view.image = image
+		button.add_subview(image_view)
+		button.image_view = image_view
 		
 		return button
 		
@@ -995,12 +1143,18 @@ class Clothing_Unit_View(Stackable_View_Template):
 		if link_id in self.link_previews:
 			self.show_temporary_warning("No adding the same link twice please", .5)
 			return
-			
+		
+		need_append = self.model.id == None
+		
 		#update model
 		self.model.save_link(link_id)
 			
 		#add link to clothing unit view
 		self.append_link_preview(link_id, title)
+		
+		#update previews on previous view
+		if need_append:
+			self.outfit_saver.nav.add_preview(self.view_index_stack[-1], self.model.id, (self.model.id, self.model.name))
 		
 		#pop link selector view
 		self.outfit_saver.nav.pop_view()
@@ -1061,7 +1215,9 @@ class Clothing_Unit_View(Stackable_View_Template):
 		
 	def remove_link(self, sender):
 		link_id = sender.name
+		self.remove_link_preview(link_id)
 		
+	def remove_link_preview(self, link_id):
 		#remove from model
 		self.model.remove_link(link_id)
 		
@@ -1078,9 +1234,6 @@ class Clothing_Unit_View(Stackable_View_Template):
 		buffer = s_width/30
 		last_frame = self.link_previews["0"].frame
 		self.link_scroll_view.content_size = (last_frame[0]+last_frame[2]+buffer, self.link_scroll_view.content_size[1])
-		
-		#If outfit was opened from clothing_item then we want to call preview = self.outfit_saver.nav.delete_preview()
-		#If not, calling that will remove the wrong preview
 	
 	
 ####	End Link Icon Code 						####
@@ -1108,7 +1261,7 @@ class Clothing_Unit_View(Stackable_View_Template):
 		#get icon for adding a category
 		category_id = "0"
 		if len(self.category_previews) == 0:
-			self.category_previews[category_id] = self.create_add_category_icon(self.get_next_category_frame(), "This {} is not in any categories :(")
+			self.category_previews[category_id] = self.create_add_category_icon(self.get_next_category_frame(), "This {} is not in any categories :(".format(self.model.type))
 		else:
 			self.category_previews[category_id] = self.create_add_category_icon(self.get_next_category_frame(), "")
 		self.category_scroll_view.add_subview(self.category_previews["0"])
@@ -1121,11 +1274,16 @@ class Clothing_Unit_View(Stackable_View_Template):
 			self.show_temporary_warning("category already selected", .5)
 			return
 			
+		need_append = self.model.id == None
+			
 		#update model
 		self.model.save_category(category_id)
 		
 		#add link to clothing unit view
 		self.append_category_preview(category_id)
+		
+		if need_append:
+			self.outfit_saver.nav.add_preview(self.view_index_stack[-1], self.model.id, (self.model.id, self.model.name))
 		
 		#pop link selector view
 		self.outfit_saver.nav.pop_view()
@@ -1218,7 +1376,7 @@ class Clothing_Unit_View(Stackable_View_Template):
 		self.remove_icon(category_id, self.category_remove_buttons, self.category_previews, self.category_scroll_view)
 		
 		if len(self.category_previews) == 1:
-			self.category_previews["0"].label_view.text = "This outfit is not in any categories :("
+			self.category_previews["0"].label_view.text = "This {} is not in any categories :(".format(self.model.type)
 		
 		self.last_category_y -= 1
 		buffer = s_width/30
@@ -1254,13 +1412,14 @@ class Clothing_Unit_View(Stackable_View_Template):
 		if self.remove_mode:
 			self.remove_remove_buttons_from_view()
 			self.remove_mode = False
-			self.remove_button.background_color = "f0fff5"
+			self.remove_button.view.background_color = "f0fff5"
 		else:
 			if self.title_edit_mode:
-				self.set_title(None)
+				self.title_edit_field.text_field.text = self.title_button.view.title
+				self.title_edit_field.text_field.end_editing()
 			self.add_remove_buttons_to_view()
 			self.remove_mode = True
-			self.remove_button.background_color = "bbfad0"
+			self.remove_button.view.background_color = "bbfad0"
 			
 			
 	def add_remove_buttons_to_view(self):		
@@ -1315,24 +1474,29 @@ class Clothing_Unit_View(Stackable_View_Template):
 		self.unit_remove_button = None
 		
 	def remove_icon(self, id, remove_buttons, icons, view):
-		x = len(remove_buttons)-1
 		keys = list(icons.keys())
+		x = len(list(icons.keys()))-2
 		#first move the add button
-		if len(remove_buttons) < len(icons):
+		if "0" in icons:
 			icons["0"].center = icons[keys[x]].center
-		while remove_buttons[x].view.name != id:
-			remove_buttons[x].view.center = remove_buttons[x-1].view.center
+		while keys[x] != id:
+			#this is not true when removing from an opened preview
+			if len(remove_buttons) > 0:
+				remove_buttons[x].view.center = remove_buttons[x-1].view.center
 			key = keys[x]
 			next_key = keys[x-1]
 			icons[key].center = icons[next_key].center
 			
 			x-=1
-			
-		view.remove_subview(remove_buttons[x].view)
+		
+		if len(remove_buttons) > 0:
+			view.remove_subview(remove_buttons[x].view)
+			remove_buttons.pop(x)
+		
 		view.remove_subview(icons[id])
-			
-		remove_buttons.pop(x)
 		del icons[id]
+		
+		return x
 		
 	def prompt_delete(self, sender):
 		self.outfit_saver.nav.show_warning("Delete '"+self.model.title+"'?", "All data contained in this item and references to it will be deleted", self.delete, self.cancel_remove, self.model.id)
@@ -1340,7 +1504,9 @@ class Clothing_Unit_View(Stackable_View_Template):
 	def delete(self, sender):
 		if self.model.id != None:
 			self.model.delete()
-			#also remove call point
+		
+		self.outfit_saver.nav.remove_preview(self.view_index_stack[-1], self.model.id, None)
+		
 		self.outfit_saver.nav.pop_view()
 		
 		
@@ -1356,6 +1522,11 @@ class Clothing_Unit_View(Stackable_View_Template):
 	
 	#closes the top view, opens the next view
 	def close_view(self, sender):
+		#if edit title mode is on, we want to restore the title to what it originally was
+		if self.title_edit_mode:
+			self.title_edit_field.text_field.text = self.title_button.view.title
+			self.title_edit_field.text_field.end_editing()
+		
 		self.outfit_saver.nav.pop_view()
 		
 	def put_icons_on_view(self, view, icons):
@@ -1373,12 +1544,23 @@ class Clothing_Unit_View(Stackable_View_Template):
 			self.title_edit_mode = True
 			self.title_edit_field.text_field.begin_editing()
 			
-			
+	
+	#this will only be called as an action from text view	
 	def set_title(self, sender):
-		if sender != None:
+		if sender.text != self.title_button.view.title:
 			title = sender.text
 			self.title_button.view.title = title
+			
+			need_append = self.model.id == None
+			
 			self.model.save_title(title)
+			
+			#update preview on previous screen
+			if need_append:
+				self.outfit_saver.nav.add_preview(self.view_index_stack[-1], self.model.id, (self.model.id, self.model.title))
+			else:
+				self.outfit_saver.nav.edit_preview(self.view_index_stack[-1], self.model.id, (title, None))
+		
 		self.remove_subview(self.title_edit_field.text_field)
 		self.add_subview(self.title_button.view)
 		
@@ -1408,12 +1590,9 @@ class Clothing_Unit_View(Stackable_View_Template):
 #
 ##################################
 
-class Image_Selector_View(ui.View):
-	def __init__(self, outfit_saver):
-		self.outfit_saver = outfit_saver
-		self.width = s_width
-		self.height = s_height
-		self.model_stack = []
+class Image_Selector_View(Stackable_View_Template):
+	def __init__(self, Model, outfit_saver):
+		super().__init__(Model, outfit_saver)
 		
 		self.zero_out_variables()
 		
@@ -1465,30 +1644,10 @@ class Image_Selector_View(ui.View):
 	def zero_out_variables(self):
 		self.add_options_visible = False
 		self.warning_visible = False
-		self.model = None
 		self.images = {}
 		
 		self.last_x = -1
 		self.last_y = 0
-		
-	def push_model(self, type, extra_params):
-		self.model_stack.append(type)
-		self.return_function = extra_params[0]
-		self.selected_image = extra_params[1]
-		if type[0] == "o":
-			self.background_color = "97C1B0"
-		elif type[0] == "i":
-			self.background_color = "DCBCDA"
-		
-		if self.model == None or self.model.type != type:
-			self.depopulate_view()
-			self.zero_out_variables()
-			self.model = Image_Selector(type)
-			self.title.view.title = self.model.image_directory
-			self.populate_view(extra_params)
-		
-	def pop_model(self):
-		self.model_stack = []
 		
 	def toggle_add_options(self, sender):
 		if self.add_options_visible:
@@ -1543,6 +1702,15 @@ class Image_Selector_View(ui.View):
 		self.outfit_saver.nav.pop_view()
 		
 	def populate_view(self, params):
+		self.zero_out_variables()
+		type = self.model_stack[-1]
+		self.return_function = params[0]
+		self.selected_image = params[1]
+		self.title.view.title = self.model.image_directory
+		if type[0] == "o":
+			self.background_color = "97C1B0"
+		elif type[0] == "i":
+			self.background_color = "DCBCDA"
 		self.images = {}
 		if self.model.have_null_image:
 			frame = self.get_next_frame()
@@ -1572,7 +1740,15 @@ class Image_Selector_View(ui.View):
 	def depopulate_view(self):
 		for image_id in self.images:
 			self.scroll_view.remove_subview(self.images[image_id])
-		
+			
+	def prepare_for_open(self, params):
+		if self.selected_image != "":
+			self.return_function = params[0]
+			self.images[self.selected_image].border_width = 1
+			self.images[self.selected_image].border_color = "black"
+			self.selected_image = params[1]
+			self.images[self.selected_image].border_color = "bbfad0"
+			self.images[self.selected_image].border_width = 5
 		
 		
 	def create_button(self, frame, image, image_id):
@@ -1613,6 +1789,7 @@ class Image_Selector_View(ui.View):
 		if self.add_options_visible:
 			self.toggle_add_options(None)
 		
+		#"": this is the case where a null image is not selectable and image view closes on selection
 		if self.selected_image != "":
 			old_selection = self.images[self.selected_image]
 			old_selection.border_width = 1
@@ -1755,7 +1932,7 @@ class Search_View(Stackable_View_Template):
 		self.scroll_view.content_size = (s_width, s_height*.5)
 		self.icons = {}
 		
-	def prepare_for_open(self):
+	def prepare_for_open(self, params):
 		self.search("")
 	
 	def populate_view(self, params):
@@ -1766,13 +1943,18 @@ class Search_View(Stackable_View_Template):
 		
 	def depopulate_view(self):
 		self.remove_icons()
+		
+	def edit_preview(self, preview_id, params):
+		self.search(self.text_field.text)
+	
+	def remove_preview(self, preview_id, params):
+		self.search(self.text_field.text)
 	
 	def search(self, search_string):
 		self.remove_icons()
 		data = self.model.search(search_string)
 		
 		#assume icons are empty
-		print(self.icons)
 		for entry in data:
 			icon = self.create_icon(entry[0], entry[1], entry[2])
 			self.icons[entry[0]] = icon

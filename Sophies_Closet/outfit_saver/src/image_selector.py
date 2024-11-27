@@ -10,20 +10,22 @@ import ui
 	
 		
 class Image_Selector:
-	def __init__(self, type):
-		self.type = type
+	def __init__(self, id, params, view, outfit_saver):
+		self.id = id
+		self.view = view
+		self.outfit_saver = outfit_saver
 		# type possibilities:
 		#	"oc": outfit category background
 		#	"ic": item category background
 		#	"outfit": outfit image
 		#	"item": item image
-		if type[1] == "c":
+		if id[1] == "c":
 			self.image_directory = "background_images"
 			self.thumbnail_directory = "background_thumbnails"
 			self.have_null_image = True
 		else:
-			self.image_directory = type + "_images"
-			self.thumbnail_directory = type + "_thumbnails"
+			self.image_directory = id + "_images"
+			self.thumbnail_directory = id + "_thumbnails"
 			self.have_null_image = False
 			
 	def load_images(self):

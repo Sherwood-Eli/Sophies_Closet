@@ -23,3 +23,6 @@ class Category_Viewer:
 		categories = cursor.fetchall()
 		conn.close()
 		return categories
+		
+	def open_category(self, id, params):
+		self.outfit_saver.nav.push_view(self.image_type+"_category", id, params)

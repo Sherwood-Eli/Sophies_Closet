@@ -3,13 +3,20 @@ import sqlite3
 
 from clothing_unit import Clothing_Unit
 
+#To get the preview, get the preview saved in the view second from the top.
+#Will this always be affective?
+#We can make sure it is always affective by calling at the right time
+
+#id: Necessary for retrieving all data related to this Outfit
+#view: Necessary for
+#outfit_saver: Necessary for calling Nav stuff
+
 class Item(Clothing_Unit):
 	def __init__(self, id, params, view, outfit_saver):
 		self.type = "item"
 		self.link_type = "outfit"
 		super().__init__(id, view, outfit_saver)
 		
-			
 	#Called from:
 	#	Clothing_Unit.__init__()
 	def get_sql_data(self):
@@ -38,6 +45,7 @@ class Item(Clothing_Unit):
 	#	self.save_score()
 	#	self.save_title()
 	def create(self):
+		print("hi")
 		conn = sqlite3.connect('../db/outfit_saver.db')
 		cursor = conn.cursor()
 		#insert into table
@@ -53,7 +61,8 @@ class Item(Clothing_Unit):
 			"{}"
 			)
 		'''.format(self.title, self.score, self.note)
-			
+		
+		print("hi again")
 		result = cursor.execute(sql)
 		conn.commit()
 		
@@ -63,9 +72,11 @@ class Item(Clothing_Unit):
 		cursor.execute(sql)
 		last_row=cursor.fetchall()
 		self.id = str(last_row[0][0])
-				
+		
+		
 		if self.category.id == None:
-			self.category.save_category()
+			self.category.save_category(self.category.name, self.category.photo_path)
+		
 		
 		sql='''
 		INSERT INTO "category_items" (
@@ -115,15 +126,10 @@ class Item(Clothing_Unit):
 		conn.commit()
 		conn.close()
 			
-	def add_image(self, sender):
-		if not self.remove_mode:
-			if self.image_selector != None:
-				self.image_selector = Image_Selector("item_images", "item_thumbnails", "", self.choose_image, self.outfit_saver, False, self.view.background_color)
-			self.image_selector.open()
+	def add_image(self):
+		self.outfit_saver.nav.push_view("image_selector", "item", (self.view.choose_image, ""))
 			
-	def remove_image(self, sender):
-		image_id = sender.name
-		
+	def remove_image(self, image_id):
 		conn = sqlite3.connect('../db/outfit_saver.db')
 		cursor = conn.cursor()
 		
@@ -137,86 +143,20 @@ class Item(Clothing_Unit):
 		conn.commit()
 		conn.close()
 		
-		if len(self.image_icons) == 5 and "0" not in self.image_icons:
-			frame = self.get_next_image_frame()
-			self.image_icons["0"] = self.create_add_icon(frame, "", self.add_image, 25)
-			self.image_scroll_view.add_subview(self.image_icons["0"])
-		
-		self.remove_icon(image_id, self.image_remove_buttons, self.image_icons, self.image_scroll_view)
-		
-		if len(self.image_icons) == 1:
-			self.image_scroll_view.remove_subview(self.image_icons["0"])
-			self.image_icons["0"] = self.create_add_icon(self.image_icons["0"].frame, "No item images yet :(", self.add_image, 25)
-			self.image_scroll_view.add_subview(self.image_icons["0"])
-		
-		self.last_image_x -= 0
-		buffer = self.outfit_saver.screen_width/30
-		last_frame = self.image_icons["0"].frame
-		self.image_scroll_view.content_size = (last_frame[0]+last_frame[2]+buffer, self.image_scroll_view.content_size[1])
-		
-		if self.caller_type == "c":
-			self.category.update_icon(self.id, self.title, self.score)
-		
-	def create_link_icon(self, link_id, link_name):
-		frame = self.get_next_link_frame()
-		
-		button = ui.Button(border_width=2, border_color="black", frame=frame, background_color="f0fff5")
-		button.corner_radius = button.width/10
-		button.name = link_id
-		
-		buffer = frame[2]/20
-		title = ui.Label(frame = (buffer, buffer, frame[2]-(2*buffer), frame[3]-(2*buffer)))
-		title.number_of_lines = 0
-		title.line_break_mode = ui.LB_WORD_WRAP
-		title.alignment = ui.ALIGN_LEFT
-		title.text = link_name
-		button.add_subview(title)
-		
-		if link_id != "0":
-			button.action = self.open_link
-			conn = sqlite3.connect('../db/outfit_saver.db')
-			cursor = conn.cursor()
-			
-			sql = '''
-			SELECT "outfit_image_id"
-			FROM "outfit_images"
-			WHERE outfit_id="{}"
-			'''.format(link_id)
-			cursor.execute(sql)
-			image_ids = cursor.fetchall()
-			conn.close()
-			
-			#only take the first one
-			if len(image_ids) == 0:
-				return button
-			image_id = str(image_ids[0][0])
-			image = ui.Image.named("../images/outfit_thumbnails/"+image_id+".PNG").with_rendering_mode(ui.RENDERING_MODE_ORIGINAL)
-			image_view = ui.ImageView(content_mode=ui.CONTENT_SCALE_ASPECT_FILL, frame=(0,0,frame[2],frame[3]))
-			
-		image_view.image = image
-		button.add_subview(image_view)
-		
-		return button
-		
 	def add_link(self, sender):
-		if not self.remove_mode:
-			search_query = """
-			SELECT outfit_id, outfit_name
-			FROM outfits
-			WHERE outfit_name LIKE 
-			"""
-			image_query = """
-			SELECT outfit_image_id
-			FROM outfit_images
-			WHERE outfit_id=
-			"""
-			if self.link_selector != None:
-				self.link_selector = Search_View("Search Outfits", search_query, image_query, "outfit_thumbnails", self.choose_link, self.view.background_color, self.outfit_saver)
-			self.link_selector.open()
+		search_query = """
+		SELECT outfit_id, outfit_name
+		FROM outfits
+		WHERE outfit_name LIKE 
+		"""
+		image_query = """
+		SELECT outfit_image_id
+		FROM outfit_images
+		WHERE outfit_id=
+		"""
+		self.outfit_saver.nav.push_view("search", "outfits", ("Search Outfits", search_query, image_query, "outfit_thumbnails", self.view.choose_link, self.view.background_color))
 			
-	def remove_link(self, sender):
-		link_id = sender.name
-		
+	def remove_link(self, link_id):
 		conn = sqlite3.connect('../db/outfit_saver.db')
 		cursor = conn.cursor()
 		
@@ -230,43 +170,16 @@ class Item(Clothing_Unit):
 		conn.commit()
 		conn.close()
 		
-		self.remove_icon(link_id, self.link_remove_buttons, self.link_icons, self.link_scroll_view)
-		
-		if len(self.link_icons) == 1:
-			self.link_scroll_view.remove_subview(self.link_icons["0"])
-			self.link_icons["0"] = self.create_add_icon(self.link_icons["0"].frame, "Not in any outfits yet :(", self.add_link, 12)
-			self.link_scroll_view.add_subview(self.link_icons["0"])
-		
-		if self.last_link_y == 0:
-			self.last_link_x -= 1
-			self.last_link_y = 1
-		else:
-			self.last_link_y = 0
-		buffer = self.outfit_saver.screen_width/30
-		last_frame = self.link_icons["0"].frame
-		self.link_scroll_view.content_size = (last_frame[0]+last_frame[2]+buffer, self.link_scroll_view.content_size[1])
-		
-	def open_link(self, sender):
-		if not self.remove_mode:
-			from outfit import Outfit
-			Outfit(sender.name, self.category, "i", self.outfit_saver)
-		
-		
 	def add_category(self, sender):
-		if not self.remove_mode:
-			search_query = """
-			SELECT category_id, category_name, photo_path
-			FROM item_categories
-			WHERE category_name LIKE 
-			"""
-			image_query = ""
-			if self.category_selector != None:
-				self.category_selector = Search_View("Search Item Categories", search_query, image_query, "background_thumbnails", self.choose_category, self.view.background_color, self.outfit_saver)
-			self.category_selector.open()
+		search_query = """
+		SELECT category_id, category_name, photo_path
+		FROM item_categories
+		WHERE category_name LIKE 
+		"""
+		image_query = ""
+		self.outfit_saver.nav.push_view("search", "ic", ("Search Item Categories", search_query, image_query, "background_thumbnails", self.view.choose_category, self.view.background_color))
 			
-	def remove_category(self, sender):
-		category_id = sender.name
-		
+	def remove_category(self, category_id):
 		conn = sqlite3.connect('../db/outfit_saver.db')
 		cursor = conn.cursor()
 		
@@ -280,21 +193,6 @@ class Item(Clothing_Unit):
 		conn.commit()
 		conn.close()
 		
-		self.remove_icon(category_id, self.category_remove_buttons, self.category_icons, self.category_scroll_view)
-		
-		if len(self.category_icons) == 1:
-			self.category_scroll_view.remove_subview(self.category_icons["0"])
-			self.category_icons["0"] = self.create_add_category_icon(self.category_icons["0"].frame, "This item is not in any categories :(")
-			self.category_scroll_view.add_subview(self.category_icons["0"])
-		
-		self.last_category_y -= 1
-		buffer = self.outfit_saver.screen_width/30
-		last_frame = self.category_icons["0"].frame
-		self.category_scroll_view.content_size = (self.category_scroll_view.content_size[0], last_frame[1]+last_frame[3]+buffer)
-		
-		if self.caller_type == "c":
-			if self.category.id == category_id:
-				self.category.remove_clothing_unit_icon(self.id)
 		
 	def save_note(self):
 		if self.id == None:
@@ -329,7 +227,8 @@ class Item(Clothing_Unit):
 			conn.commit()
 			conn.close()
 		
-	def save_title(self):
+	def save_title(self, new_title):
+		self.title = new_title
 		if self.id == None:
 			self.create()
 		else:
@@ -344,5 +243,3 @@ class Item(Clothing_Unit):
 			result = cursor.execute(sql)
 			conn.commit()
 			conn.close()
-			if self.caller_type == "c":
-				self.category.update_icon(self.id, self.title, self.score)

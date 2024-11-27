@@ -1,6 +1,5 @@
 import ui
 import sqlite3
-import os
 
 from clothing_unit import Clothing_Unit
 
@@ -72,9 +71,8 @@ class Outfit(Clothing_Unit):
 		last_row=cursor.fetchall()
 		self.id = str(last_row[0][0])
 		
-		#TODO
-		#if self.category.id == None:
-		#	self.category.save_category()
+		if self.category.id == None:
+			self.category.save_category(self.category.name, self.category.photo_path)
 		
 		sql='''
 		INSERT INTO "category_outfits" (
@@ -127,7 +125,6 @@ class Outfit(Clothing_Unit):
 		self.outfit_saver.nav.push_view("image_selector", "outfit", (self.view.choose_image, ""))
 	
 	def remove_image(self, image_id):
-		
 		conn = sqlite3.connect('../db/outfit_saver.db')
 		cursor = conn.cursor()
 		
@@ -194,8 +191,6 @@ class Outfit(Clothing_Unit):
 		conn.commit()
 		conn.close()
 		
-		
-		
 	
 	def save_note(self):
 		if self.id == None:
@@ -246,5 +241,3 @@ class Outfit(Clothing_Unit):
 			result = cursor.execute(sql)
 			conn.commit()
 			conn.close()
-		
-		

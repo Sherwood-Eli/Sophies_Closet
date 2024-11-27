@@ -29,9 +29,7 @@ class Item_Category(Category):
 	def open_clothing_unit(self, item_id):
 		self.outfit_saver.nav.push_view("item", item_id, item_id)
 			
-	def remove_clothing_unit(self, sender):
-		item_id = sender.name
-		
+	def remove_clothing_unit(self, item_id):
 		conn = sqlite3.connect('../db/outfit_saver.db')
 		cursor = conn.cursor()
 		
@@ -44,5 +42,3 @@ class Item_Category(Category):
 		
 		conn.commit()
 		conn.close()
-		
-		self.remove_clothing_unit_icon(item_id)

@@ -10,12 +10,6 @@ class Item_Category_Viewer(Category_Viewer):
 		self.image_type = "item"
 				
 		super().__init__(model_id, view, outfit_saver)
-				
-	def add_category(self, sender):
-		self.outfit_saver.nav.push_view("item_category", "", None)
-		
-	def open_category(self, sender):
-		self.outfit_saver.nav.push_view("item_category", sender.name, sender.name)
 		
 	def open_search(self):
 		search_query = """
@@ -35,9 +29,7 @@ class Item_Category_Viewer(Category_Viewer):
 		item_id = sender.name
 		self.outfit_saver.nav.push_view("item", item_id, item_id)
 		
-	def remove_category(self, sender):
-		category_id = sender.name
-		
+	def remove_category(self, category_id):
 		conn = sqlite3.connect('../db/outfit_saver.db')
 		cursor = conn.cursor()
 		
@@ -57,8 +49,3 @@ class Item_Category_Viewer(Category_Viewer):
 		
 		conn.commit()
 		conn.close()
-		
-		self.view.remove_category_from_view(category_id)
-		
-		
-		
