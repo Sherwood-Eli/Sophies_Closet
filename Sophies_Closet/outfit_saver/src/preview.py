@@ -107,7 +107,7 @@ class Preview:
 		self.view.corner_radius = self.view.width/10
 		
 		buffer = frame[2]/20
-		self.title = ui.Label(frame = (buffer, buffer, frame[2]-(2*buffer), frame[3]-(2*buffer)))
+		self.title = ui.Label(text_color="black", frame = (buffer, buffer, frame[2]-(2*buffer), frame[3]-(2*buffer)))
 		self.title.number_of_lines = 0
 		self.title.line_break_mode = ui.LB_WORD_WRAP
 		self.title.alignment = ui.ALIGN_LEFT

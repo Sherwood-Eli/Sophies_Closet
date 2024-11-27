@@ -9,9 +9,9 @@
 /* Begin PBXBuildFile section */
 		03713C522B87F9040096FE99 /* outfit_saver in Resources */ = {isa = PBXBuildFile; fileRef = 03713C512B87F9040096FE99 /* outfit_saver */; };
 		03B525FF2B8865D400AA02E8 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 03B525FE2B8865D400AA02E8 /* Assets.xcassets */; };
+		45D227DC2CF6C7730072224D /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 45D227DB2CF6C7720072224D /* Launch Screen.storyboard */; };
 		7FF090922131782E0030D01C /* PYAAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 7FF090912131782E0030D01C /* PYAAppDelegate.m */; };
 		7FF090952131782E0030D01C /* PYAViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7FF090942131782E0030D01C /* PYAViewController.m */; };
-		7FF0909D2131782F0030D01C /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 7FF0909B2131782F0030D01C /* LaunchScreen.storyboard */; };
 		7FF090A02131782F0030D01C /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 7FF0909F2131782F0030D01C /* main.m */; };
 		7FF090A7213178D00030D01C /* Py3Kit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7FF090A6213178D00030D01C /* Py3Kit.framework */; };
 		7FF090A92131790C0030D01C /* Py3Kit.framework in Embed Py3Kit Framework */ = {isa = PBXBuildFile; fileRef = 7FF090A6213178D00030D01C /* Py3Kit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -34,12 +34,12 @@
 /* Begin PBXFileReference section */
 		03713C512B87F9040096FE99 /* outfit_saver */ = {isa = PBXFileReference; lastKnownFileType = folder; path = outfit_saver; sourceTree = "<group>"; };
 		03B525FE2B8865D400AA02E8 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		45D227DB2CF6C7720072224D /* Launch Screen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
 		7FF0908D2131782E0030D01C /* Sophies_Closet.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Sophies_Closet.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7FF090902131782E0030D01C /* PYAAppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PYAAppDelegate.h; sourceTree = "<group>"; };
 		7FF090912131782E0030D01C /* PYAAppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = PYAAppDelegate.m; sourceTree = "<group>"; };
 		7FF090932131782E0030D01C /* PYAViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PYAViewController.h; sourceTree = "<group>"; };
 		7FF090942131782E0030D01C /* PYAViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = PYAViewController.m; sourceTree = "<group>"; };
-		7FF0909C2131782F0030D01C /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		7FF0909E2131782F0030D01C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		7FF0909F2131782F0030D01C /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		7FF090A6213178D00030D01C /* Py3Kit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Py3Kit.framework; sourceTree = "<group>"; };
@@ -81,11 +81,11 @@
 				7FF090912131782E0030D01C /* PYAAppDelegate.m */,
 				7FF090932131782E0030D01C /* PYAViewController.h */,
 				7FF090942131782E0030D01C /* PYAViewController.m */,
-				7FF0909B2131782F0030D01C /* LaunchScreen.storyboard */,
 				03B525FE2B8865D400AA02E8 /* Assets.xcassets */,
 				7FF0909E2131782F0030D01C /* Info.plist */,
 				7FF0909F2131782F0030D01C /* main.m */,
 				7FF090A6213178D00030D01C /* Py3Kit.framework */,
+				45D227DB2CF6C7720072224D /* Launch Screen.storyboard */,
 			);
 			path = Sophies_Closet;
 			sourceTree = "<group>";
@@ -150,7 +150,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				7FF0909D2131782F0030D01C /* LaunchScreen.storyboard in Resources */,
+				45D227DC2CF6C7730072224D /* Launch Screen.storyboard in Resources */,
 				03B525FF2B8865D400AA02E8 /* Assets.xcassets in Resources */,
 				03713C522B87F9040096FE99 /* outfit_saver in Resources */,
 			);
@@ -186,17 +186,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXVariantGroup section */
-		7FF0909B2131782F0030D01C /* LaunchScreen.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				7FF0909C2131782F0030D01C /* Base */,
-			);
-			name = LaunchScreen.storyboard;
-			sourceTree = "<group>";
-		};
-/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		7FF090A12131782F0030D01C /* Debug */ = {

@@ -32,7 +32,7 @@
 - (void)loadView
 {
 	[super loadView];
-	self.view.backgroundColor = [UIColor whiteColor];
+	self.view.backgroundColor = [UIColor clearColor];
 	UIEdgeInsets insets = UIEdgeInsetsMake(20, 0, 0, 0);
 	self.outputTextView = [[UITextView alloc] initWithFrame:UIEdgeInsetsInsetRect(self.view.bounds, insets)];
 	self.outputTextView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;

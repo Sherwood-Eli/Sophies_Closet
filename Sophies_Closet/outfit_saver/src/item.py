@@ -143,7 +143,7 @@ class Item(Clothing_Unit):
 		conn.commit()
 		conn.close()
 		
-	def add_link(self, sender):
+	def add_link(self):
 		search_query = """
 		SELECT outfit_id, outfit_name
 		FROM outfits
@@ -170,7 +170,7 @@ class Item(Clothing_Unit):
 		conn.commit()
 		conn.close()
 		
-	def add_category(self, sender):
+	def add_category(self):
 		search_query = """
 		SELECT category_id, category_name, photo_path
 		FROM item_categories

@@ -1111,7 +1111,7 @@ class Clothing_Unit_View(Stackable_View_Template):
 		
 		buffer = frame[2]/20
 		
-		title = ui.Label(frame = (buffer, buffer, frame[2]-(2*buffer), frame[3]-(2*buffer)))
+		title = ui.Label(text_color="black", frame = (buffer, buffer, frame[2]-(2*buffer), frame[3]-(2*buffer)))
 		title.number_of_lines = 0
 		title.line_break_mode = ui.LB_WORD_WRAP
 		title.alignment = ui.ALIGN_LEFT
@@ -1339,7 +1339,7 @@ class Clothing_Unit_View(Stackable_View_Template):
 		image_view.image = image
 		button.add_subview(image_view)
 		
-		title = ui.Label(frame = (frame[0], frame[0], frame[2]-(2*frame[0]), frame[3]-(2*frame[0])))
+		title = ui.Label(text_color="black", frame = (frame[0], frame[0], frame[2]-(2*frame[0]), frame[3]-(2*frame[0])))
 		title.number_of_lines = 0
 		title.line_break_mode = ui.LB_WORD_WRAP
 		title.alignment = ui.ALIGN_LEFT
@@ -1356,7 +1356,7 @@ class Clothing_Unit_View(Stackable_View_Template):
 		image_view = ui.ImageView(height=button.height/2, width=button.height/2, center=(button.width/2, button.height/2))
 		button.action = self.add_category
 		
-		button.label_view = ui.Label(frame = (frame[0], frame[0], frame[2]/3, frame[3]-(2*frame[0])))
+		button.label_view = ui.Label(text_color="black", frame = (frame[0], frame[0], frame[2]/3, frame[3]-(2*frame[0])))
 		button.label_view.number_of_lines = 0
 		button.label_view.line_break_mode = ui.LB_WORD_WRAP
 		button.label_view.alignment = ui.ALIGN_LEFT
@@ -1395,7 +1395,7 @@ class Clothing_Unit_View(Stackable_View_Template):
 		button = ui.Button(frame=frame, background_color="f0fff5", border_width=2, action=action)
 		button.corner_radius = button.width/10
 		
-		label = ui.Label(frame=(frame[2]/10, frame[2]/10, frame[2]-(frame[2]/5), frame[3]/5), text=title, font=("<system>", font_size), alignment=ui.ALIGN_CENTER, number_of_lines=0, line_break_mode=ui.LB_WORD_WRAP)
+		label = ui.Label(text_color="black", frame=(frame[2]/10, frame[2]/10, frame[2]-(frame[2]/5), frame[3]/5), text=title, font=("<system>", font_size), alignment=ui.ALIGN_CENTER, number_of_lines=0, line_break_mode=ui.LB_WORD_WRAP)
 		button.add_subview(label)
 		button.label_view = label
 		
@@ -1628,7 +1628,7 @@ class Image_Selector_View(Stackable_View_Template):
 		
 		frame=(s_width/5, s_height/3, s_width*(.6), s_height/5)
 		self.importing_message = ui.View(frame=frame, border_width=2, background_color="orange")
-		label = ui.Label(text="Importing image, \nplease wait...", frame=(const_buffer, const_buffer, frame[2]-(2*const_buffer), frame[3]-(2*const_buffer)), alignment=ui.ALIGN_CENTER, font=("<system-bold>", 20), number_of_lines=0, line_break_mode=ui.LB_WORD_WRAP)
+		label = ui.Label(text_color="black", text="Importing image, \nplease wait...", frame=(const_buffer, const_buffer, frame[2]-(2*const_buffer), frame[3]-(2*const_buffer)), alignment=ui.ALIGN_CENTER, font=("<system-bold>", 20), number_of_lines=0, line_break_mode=ui.LB_WORD_WRAP)
 		self.importing_message.corner_radius = self.importing_message.width/10
 		self.importing_message.add_subview(label)
 		
@@ -1857,13 +1857,13 @@ class Warning_View(ui.View):
 		
 		buffer = const_buffer
 		
-		self.primary_text = ui.Label(frame=(buffer, buffer, (self.width)-(2*buffer), (self.height/3)-(2*buffer)), alignment=ui.ALIGN_CENTER, font=("<system-bold>", 15))
+		self.primary_text = ui.Label(text_color="black", frame=(buffer, buffer, (self.width)-(2*buffer), (self.height/3)-(2*buffer)), alignment=ui.ALIGN_CENTER, font=("<system-bold>", 15))
 		self.primary_text.number_of_lines = 0
 		self.primary_text.line_break_mode = ui.LB_WORD_WRAP
 		self.primary_text.text = primary_message
 		self.add_subview(self.primary_text)
 		
-		self.secondary_text = ui.Label(frame=(buffer, (self.height/3), (self.width)-(2*buffer), (self.height/3)), alignment=ui.ALIGN_CENTER, font=("<system>", 10))
+		self.secondary_text = ui.Label(text_color="black", frame=(buffer, (self.height/3), (self.width)-(2*buffer), (self.height/3)), alignment=ui.ALIGN_CENTER, font=("<system>", 10))
 		self.secondary_text.number_of_lines = 0
 		self.secondary_text.line_break_mode = ui.LB_WORD_WRAP
 		self.secondary_text.background_color = "orange"
@@ -1980,7 +1980,7 @@ class Search_View(Stackable_View_Template):
 		
 		if name != "":
 			buffer = frame[2]/20
-			title = ui.Label(frame = (buffer, buffer, frame[2]-(2*buffer), frame[3]-(2*buffer)))
+			title = ui.Label(text_color="black", frame = (buffer, buffer, frame[2]-(2*buffer), frame[3]-(2*buffer)))
 			title.number_of_lines = 0
 			title.line_break_mode = ui.LB_WORD_WRAP
 			title.alignment = ui.ALIGN_LEFT

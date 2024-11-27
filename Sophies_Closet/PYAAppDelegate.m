@@ -26,6 +26,7 @@
 	
 	self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
 	UIViewController *vc = [[PYAViewController alloc] init];
+	self.window.backgroundColor = [UIColor colorNamed:@"Color"];
 	self.window.rootViewController = vc;
 	[self.window makeKeyAndVisible];
 	[self copyScriptResourcesIfNeeded];
